@@ -24,6 +24,8 @@ int main (int argc, char* argv[]){
     int b_secondnum = 0; // True if detects a second number and the previous bools are true
     int b_clospar = 0; // True if detects ")" and the previous bools are true
  
+    int b_domul = 1; // True if detects "do()" and false if detects "don't()"
+    
     int first_num = 0; // Equals to the first number in a mul op
     int second_num = 0; // Equals to the second number in a mul op
     int res = 0;
@@ -36,19 +38,59 @@ int main (int argc, char* argv[]){
         };
     };
 
-    int c = fgetc(pointer);
+    int c = fgetc(pointer); // First char
     while (c != EOF) {
-        if (c == 'm') { b_m = 1;}
-        else if (c == 'u' && b_m) { b_u = 1;}
-        else if (c == 'l' && b_u) { b_l = 1;}
-        else if (c == '(' && b_l ) {c = fscanf(pointer, "%d", &first_num); printf("The first number is %d | ", first_num); b_firstnum = 1; continue}
-        else if (c == ',' && b_firstnum) {c = fscanf(pointer, "%d", &second_num),printf("The second number is %d\n", second_num); b_secondnum = 1;}
-        else if (c == ')' && b_secondnum) { res += first_num*second_num; reset_bools(8, addrarray);}
-        else {
-            
-            reset_bools(8, addrarray);
+        if (b_domul && c == 'm') { // Detects mul(n1,n2) patern
+            c = fgetc(pointer); // Next char
+            if (c == 'u') {
+                c = fgetc(pointer); // Next char
+                if (c == 'l') {
+                    c = fgetc(pointer); // Next char
+                    if (c == '(') {
+                        c = fscanf(pointer, "%d", &first_num); // First number of a mul
+                        c = fgetc(pointer); // Next char
+                        if (c == ',') {
+                            c = fscanf(pointer, "%d", &second_num); // Second number of a mul
+                            c = fgetc(pointer); // Next char
+                            if (c == ')') {
+                                res += first_num*second_num;
+                                c = fgetc(pointer); // Next char
+                            }
+                        }
+                    }
+                }
+            }
         }
-        c = fgetc(pointer); // Next char
+        else if (c == 'd') { // Detects do() and don't() patern
+            c = fgetc(pointer); // Next char
+            if (c == 'o') {
+                c = fgetc(pointer); // Next char
+                if (c == '('){
+                    c = fgetc(pointer); // Next char
+                    if (c == ')') {
+                        b_domul = 1;
+                        c = fgetc(pointer); // Next char
+                    }
+                }
+                else if (c == 'n'){
+                    c = fgetc(pointer); // Next char
+                    if (c == 39){ // Apostrophe
+                        c = fgetc(pointer); // Next char
+                        if (c == 't'){
+                            c = fgetc(pointer); // Next char
+                            if (c == '('){
+                                c = fgetc(pointer); // Next char
+                                    if (c == ')') {
+                                        b_domul = 0;
+                                        c = fgetc(pointer); // Next char
+                                    }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        else c = fgetc(pointer); // Next char
     }
 
     printf("Result : %d\n", res);
