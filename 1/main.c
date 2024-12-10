@@ -7,6 +7,22 @@ int comp(const void* a, const void* b) {
     return (*(int*)a - *(int*)b);
 }
 
+int count_in_sorted_array(int *array, int length, int target){
+    int nb_found = 0;
+    int previously_found = 0;
+
+    for (int i = 0; i<length ; i++)
+    {
+        if (array[i] == target) {
+            nb_found+=1;
+            previously_found = 1;
+            }
+        else if (previously_found) break;
+    }
+    
+    return nb_found;
+}
+
 
 int main (int argc, char * argv[]){
 
@@ -33,12 +49,12 @@ int main (int argc, char * argv[]){
         // printf("The second number is %d\n", second_int);
         length+=1;
     }
-    printf("Length is %d\n", length);
+
+    printf("Array length is %d\n", length);
     int array1[length];
     int array2[length];
     fseek(pointer, 0, SEEK_SET);
-
-    for (int i = 0; i<1000; i++)
+    for (int i = 0; i<length; i++)
     {
         fscanf(pointer,"%d %d\n",&first_int,&second_int);
         array1[i] = first_int;
@@ -48,11 +64,17 @@ int main (int argc, char * argv[]){
     qsort(array1, length, sizeof(int), comp);
     qsort(array2, length, sizeof(int), comp);
 
-    for (int i = 0; i<1000; i++)
+    int previous_int = 0;
+    int number_of_occurences = 0;
+    for (int i = 0; i<length; i++)
     {
-        distance = abs(array2[i]-array1[i]);
-        printf("\tCurrent distance is %d\n", distance);
-        result+=distance;
+        if (array1[i] == previous_int) result+= previous_int*number_of_occurences;
+        else {
+            previous_int = array1[i]; // Which is actually the current int
+            number_of_occurences = count_in_sorted_array(array2, length, previous_int);
+            result+= previous_int * number_of_occurences;
+        }
+        
     }
 
 
